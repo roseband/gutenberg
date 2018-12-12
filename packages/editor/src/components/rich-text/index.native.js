@@ -234,17 +234,11 @@ export class RichText extends Component {
 			return true;
 		}
 
-		// The check below allows us to avoid updating the content right after an `onChange` call.
-		// The first time the component is drawn `lastContent` and `lastEventCount ` are both undefined
-		if ( this.lastEventCount &&
-			nextProps.value &&
-			this.lastContent &&
-			nextProps.value === this.lastContent ) {
-			return false;
-		}
+		// TODO: Please re-introduce the check to avoid updating the content right after an `onChange` call.
+		// It was removed in https://github.com/WordPress/gutenberg/pull/12417 to fix undo/redo problem.
 
-		// If the component is changed React side (merging/splitting/custom text actions) we need to make sure
-		// the native is updated as well
+		// If the component is changed React side (undo/redo/merging/splitting/custom text actions)
+		// we need to make sure the native is updated as well
 		if ( nextProps.value &&
 			this.lastContent &&
 			nextProps.value !== this.lastContent ) {
@@ -252,6 +246,55 @@ export class RichText extends Component {
 		}
 
 		return true;
+	}
+
+	componentDidMount() {
+		if ( this.props.isSelected ) {
+			this._editor.focus();
+		}
+	}
+
+	componentDidUpdate( prevProps ) {
+		if ( this.props.isSelected && ! prevProps.isSelected ) {
+			this._editor.focus();
+		}
+	}
+
+	isFormatActive( format ) {
+		return this.state.formats[ format ] && this.state.formats[ format ].isActive;
+	}
+
+	// eslint-disable-next-line no-unused-vars
+	removeFormat( format ) {
+		this._editor.applyFormat( format );
+	}
+
+	// eslint-disable-next-line no-unused-vars
+	applyFormat( format, args, node ) {
+		this._editor.applyFormat( format );
+	}
+
+	changeFormats( formats ) {
+		const newStateFormats = {};
+		forEach( formats, ( formatValue, format ) => {
+			newStateFormats[ format ] = getFormatValue( format );
+			const isActive = this.isFormatActive( format );
+			if ( isActive && ! formatValue ) {
+				this.removeFormat( format );
+			} else if ( ! isActive && formatValue ) {
+				this.applyFormat( format );
+			}
+		} );
+
+		this.setState( ( state ) => ( {
+			formats: merge( {}, state.formats, newStateFormats ),
+		} ) );
+	}
+
+	toggleFormat( format ) {
+		return () => this.changeFormats( {
+			[ format ]: ! this.state.formats[ format ],
+		} );
 	}
 
 	render() {
@@ -281,6 +324,7 @@ export class RichText extends Component {
 					text={ { text: html, eventCount: this.lastEventCount } }
 					onChange={ this.onChange }
 					onFocus={ this.props.onFocus }
+					onBlur={ this.props.onBlur }
 					onEnter={ this.onEnter }
 					onBackspace={ this.onBackspace }
 					onContentSizeChange={ this.onContentSizeChange }
