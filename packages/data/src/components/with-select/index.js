@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import isShallowEqualObjects from '@wordpress/is-shallow-equal/objects';
+import { isShallowEqualObjects } from '@wordpress/is-shallow-equal';
 import { createHigherOrderComponent } from '@wordpress/compose';
 
 /**
