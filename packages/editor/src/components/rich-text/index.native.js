@@ -195,9 +195,7 @@ export class RichText extends Component {
 	}
 
 	onSelectionChange( start, end, text ) {
-		const realStart = Math.min( start, end );
-		const realEnd = Math.max( start, end );
-		this.setState( { start: realStart, end: realEnd, text } );
+		this.setState( { start, end, text } );
 	}
 
 	isEmpty() {
@@ -227,7 +225,7 @@ export class RichText extends Component {
 		return value;
 	}
 
-	shouldComponentUpdate( nextProps ) {
+	shouldComponentUpdate( nextProps, nextState ) {
 		if ( nextProps.tagName !== this.props.tagName || nextProps.isSelected !== this.props.isSelected ) {
 			this.lastEventCount = undefined;
 			this.lastContent = undefined;
@@ -245,6 +243,10 @@ export class RichText extends Component {
 			this.lastEventCount = undefined; // force a refresh on the native side
 		}
 
+		if ( nextState.start !== this.state.start || nextState.end !== this.state.end ) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -260,43 +262,6 @@ export class RichText extends Component {
 		} else if ( ! this.props.isSelected && prevProps.isSelected ) {
 			this._editor.blur();
 		}
-	}
-
-	isFormatActive( format ) {
-		return this.state.formats[ format ] && this.state.formats[ format ].isActive;
-	}
-
-	// eslint-disable-next-line no-unused-vars
-	removeFormat( format ) {
-		this._editor.applyFormat( format );
-	}
-
-	// eslint-disable-next-line no-unused-vars
-	applyFormat( format, args, node ) {
-		this._editor.applyFormat( format );
-	}
-
-	changeFormats( formats ) {
-		const newStateFormats = {};
-		forEach( formats, ( formatValue, format ) => {
-			newStateFormats[ format ] = getFormatValue( format );
-			const isActive = this.isFormatActive( format );
-			if ( isActive && ! formatValue ) {
-				this.removeFormat( format );
-			} else if ( ! isActive && formatValue ) {
-				this.applyFormat( format );
-			}
-		} );
-
-		this.setState( ( state ) => ( {
-			formats: merge( {}, state.formats, newStateFormats ),
-		} ) );
-	}
-
-	toggleFormat( format ) {
-		return () => this.changeFormats( {
-			[ format ]: ! this.state.formats[ format ],
-		} );
 	}
 
 	render() {
