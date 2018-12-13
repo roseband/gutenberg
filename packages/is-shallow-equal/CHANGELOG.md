@@ -2,7 +2,7 @@
 
 ### New Feature
 
-- Type-specific variants are now exposed from the module root. In a WordPress context, this has the effect of making them available from `wp.isShallowEqual.isShallowEqualObjects`.
+- Type-specific variants are now exposed from the module root. In a WordPress context, this has the effect of making them available as `wp.isShallowEqual.isShallowEqualObjects` and `wp.isShallowEqual.isShallowEqualArrays`.
 
 ## 1.1.0 (2018-07-12)
 
