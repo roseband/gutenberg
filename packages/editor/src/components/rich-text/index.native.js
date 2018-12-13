@@ -239,8 +239,8 @@ export class RichText extends Component {
 
 		// If the component is changed React side (undo/redo/merging/splitting/custom text actions)
 		// we need to make sure the native is updated as well
-		if ( nextProps.value &&
-			this.lastContent &&
+		if ( ( typeof nextProps.value !== 'undefined' ) &&
+			( typeof this.lastContent !== 'undefined' ) &&
 			nextProps.value !== this.lastContent ) {
 			this.lastEventCount = undefined; // force a refresh on the native side
 		}
@@ -257,6 +257,8 @@ export class RichText extends Component {
 	componentDidUpdate( prevProps ) {
 		if ( this.props.isSelected && ! prevProps.isSelected ) {
 			this._editor.focus();
+		} else if ( ! this.props.isSelected && prevProps.isSelected ) {
+			this._editor.blur();
 		}
 	}
 

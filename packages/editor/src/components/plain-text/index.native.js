@@ -21,6 +21,12 @@ export default class PlainText extends Component {
 		}
 	}
 
+	componentDidUpdate( prevProps ) {
+		if ( ! this.props.isSelected && prevProps.isSelected ) {
+			this._input.blur();
+		}
+	}
+
 	focus() {
 		this._input.focus();
 	}
@@ -28,12 +34,14 @@ export default class PlainText extends Component {
 	render() {
 		return (
 			<TextInput
+				{ ...this.props }
 				ref={ ( x ) => this._input = x }
 				className={ [ styles[ 'editor-plain-text' ], this.props.className ] }
-				onChangeText={ ( text ) => this.props.onChange( text ) }
+				onChange={ ( event ) => {
+					this.props.onChange( event.nativeEvent.text );
+				} }
 				onFocus={ this.props.onFocus } // always assign onFocus as a props
 				onBlur={ this.props.onBlur } // always assign onBlur as a props
-				{ ...this.props }
 			/>
 		);
 	}
